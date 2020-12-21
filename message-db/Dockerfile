@@ -1,0 +1,12 @@
+# based on https://github.com/articulate/docker-message-db/blob/master/Dockerfile
+
+FROM postgres:latest
+ARG MESSAGE_DB_VERSION
+
+WORKDIR /usr/src
+ADD https://github.com/message-db/message-db/archive/v${MESSAGE_DB_VERSION}.tar.gz message-db.tar.gz
+RUN tar -xzf message-db.tar.gz
+RUN mv message-db-${MESSAGE_DB_VERSION} message-db
+
+WORKDIR /
+COPY docker-entrypoint-initdb.d /docker-entrypoint-initdb.d
