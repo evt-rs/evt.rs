@@ -1,7 +1,6 @@
 [package]
 name = "evt"
 description = "Event-Sourced Autonomous Services"
-license = "MIT"
 license-file = "LICENSE"
 version = "0.0.1"
 authors = ["Matt Briggs <matt@mattbriggs.net>"]

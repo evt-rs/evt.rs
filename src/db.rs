@@ -13,14 +13,12 @@ pub fn connect(config: &str) -> Client {
     let builder = SslConnector::builder(SslMethod::tls()).unwrap();
     let connector = MakeTlsConnector::new(builder.build());
 
-    let client = Client::connect(&config, connector)
-        .unwrap_or_else(|err| panic!("could not connect to database: {}", err));
-
-    return client;
+    Client::connect(&config, connector)
+        .unwrap_or_else(|err| panic!("could not connect to database: {}", err))
 }
 
 pub fn read_configuration() -> String {
-    std::env::var(CONFIG_ENV).unwrap_or(String::from(MISSING))
+    std::env::var(CONFIG_ENV).unwrap_or_else(|_| String::from(MISSING))
 }
 
 #[cfg(test)]
@@ -37,9 +35,8 @@ mod tests {
         let client = build();
         assert!(!client.is_closed());
 
-        match existing {
-            Ok(c) => std::env::set_var(CONFIG_ENV, c),
-            _ => (),
+        if let Ok(c) = existing {
+            std::env::set_var(CONFIG_ENV, c);
         }
     }
 
@@ -53,9 +50,8 @@ mod tests {
 
         assert_eq!(config, read);
 
-        match existing {
-            Ok(c) => std::env::set_var(CONFIG_ENV, c),
-            _ => (),
+        if let Ok(c) = existing {
+            std::env::set_var(CONFIG_ENV, c);
         }
     }
 
@@ -76,6 +72,5 @@ mod tests {
     #[should_panic(expected = "invalid connection string")]
     fn panics_when_config_is_incorrect() {
         connect("nope");
-        ();
     }
 }
