@@ -1,6 +1,6 @@
-![Logo Image](https://raw.githubusercontent.com/evt-rs/evt.rs/master/logo.svg)
+<img src="https://raw.githubusercontent.com/evt-rs/evt.rs/master/logo.svg" alt="Logo Image" height="100" />
 
-# evt
+<hr/>
 
 Event-Sourced autonomous services for rust. An implementation of [Eventide](https://eventide-project.org/) using [Message DB](https://github.com/message-db/message-db).
 
