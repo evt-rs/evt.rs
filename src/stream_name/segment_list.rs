@@ -4,7 +4,7 @@ pub(crate) trait SegmentList {
 
 impl SegmentList for Vec<&str> {
     fn process(self) -> Option<Vec<String>> {
-        Some(self.into_iter().map(|s| String::from(s)).collect())
+        Some(self.into_iter().map(String::from).collect())
     }
 }
 
@@ -16,12 +16,7 @@ impl SegmentList for Vec<String> {
 
 impl SegmentList for &Vec<&str> {
     fn process(self) -> Option<Vec<String>> {
-        Some(
-            self.to_owned()
-                .into_iter()
-                .map(|s| String::from(s))
-                .collect(),
-        )
+        Some(self.to_owned().into_iter().map(String::from).collect())
     }
 }
 
@@ -33,7 +28,7 @@ impl SegmentList for &Vec<String> {
 
 impl SegmentList for &[&str] {
     fn process(self) -> Option<Vec<String>> {
-        Some(self.to_vec().into_iter().map(|s| String::from(s)).collect())
+        Some(self.to_vec().into_iter().map(String::from).collect())
     }
 }
 

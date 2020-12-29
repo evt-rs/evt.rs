@@ -14,7 +14,7 @@ pub fn connect(config: &str) -> Client {
     let connector = MakeTlsConnector::new(builder.build());
 
     Client::connect(&config, connector)
-        .unwrap_or_else(|err| panic!("could not connect to database: {}", err))
+        .unwrap_or_else(|err| panic!("could not connect to database {}: {}", config, err))
 }
 
 pub fn read_configuration() -> String {

@@ -1,10 +1,10 @@
 use super::*;
 
-pub fn entity(category: &String, id: &String) -> String {
+pub fn entity(category: &str, id: &str) -> String {
     stream_name!(category, id = id)
 }
 
-pub fn split(stream_name: &String) -> (String, Option<String>) {
+pub fn split(stream_name: &str) -> (String, Option<String>) {
     match split_once(stream_name) {
         Some((start, end)) => (String::from(start), Some(String::from(end))),
         None => (String::from(stream_name), None),
@@ -12,7 +12,7 @@ pub fn split(stream_name: &String) -> (String, Option<String>) {
 }
 
 // this exists in unstable
-fn split_once<'a>(value: &String) -> Option<(&str, &str)> {
+fn split_once(value: &str) -> Option<(&str, &str)> {
     let mut splitter = value.splitn(2, ID_SEPARATOR);
     let first = splitter.next()?;
     let second = splitter.next()?;
@@ -20,55 +20,55 @@ fn split_once<'a>(value: &String) -> Option<(&str, &str)> {
     Some((first, second))
 }
 
-pub fn get_id(stream_name: &String) -> Option<String> {
+pub fn get_id(stream_name: &str) -> Option<String> {
     let (_, id) = split(stream_name);
     id
 }
 
-pub fn get_ids(stream_name: &String) -> Option<Vec<String>> {
+pub fn get_ids(stream_name: &str) -> Option<Vec<String>> {
     Some(
         get_id(stream_name)?
             .split(COMPOUND_ID_SEPARATOR)
-            .map(|s| String::from(s))
+            .map(String::from)
             .collect(),
     )
 }
 
-pub fn get_category(stream_name: &String) -> String {
+pub fn get_category(stream_name: &str) -> String {
     let (category, _) = split(stream_name);
     category
 }
 
-pub fn is_category(stream_name: &String) -> bool {
+pub fn is_category(stream_name: &str) -> bool {
     !stream_name.contains(ID_SEPARATOR)
 }
 
-pub fn get_category_type(stream_name: &String) -> Option<String> {
+pub fn get_category_type(stream_name: &str) -> Option<String> {
     if !stream_name.contains(CATEGORY_TYPE_SEPARATOR) {
         return None;
     }
 
     let mut parts: Vec<String> = get_category(stream_name)
         .split(CATEGORY_TYPE_SEPARATOR)
-        .map(|s| String::from(s))
+        .map(String::from)
         .collect();
 
     Some(parts.remove(1))
 }
 
-pub fn get_category_types(stream_name: &String) -> Option<Vec<String>> {
+pub fn get_category_types(stream_name: &str) -> Option<Vec<String>> {
     let types: Vec<String> = get_category_type(stream_name)?
         .split(COMPOUND_TYPE_SEPARATOR)
-        .map(|s| String::from(s))
+        .map(String::from)
         .collect();
 
     Some(types)
 }
 
-pub fn get_entity_name(stream_name: &String) -> String {
+pub fn get_entity_name(stream_name: &str) -> String {
     let mut parts: Vec<String> = get_category(stream_name)
         .split(CATEGORY_TYPE_SEPARATOR)
-        .map(|s| String::from(s))
+        .map(String::from)
         .collect();
 
     parts.remove(0)

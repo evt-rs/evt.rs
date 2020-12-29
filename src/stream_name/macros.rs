@@ -40,7 +40,7 @@ pub fn build_stream_name(
     category_type: Option<String>,
     category_types: Option<Vec<String>>,
 ) -> String {
-    let mut stream_name = String::from(category);
+    let mut stream_name = category;
     let mut types: Vec<String> = vec![];
 
     if let Some(t) = category_type {
@@ -81,7 +81,7 @@ pub fn build_stream_name(
         stream_name.push_str(id_part.as_str());
     }
 
-    return stream_name;
+    stream_name
 }
 
 #[cfg(test)]
@@ -92,7 +92,7 @@ mod tests {
     fn just_a_category() {
         let category = controls::category();
 
-        let name = stream_name!(&category);
+        let name = stream_name!(category);
 
         assert_eq!(category, name);
     }
@@ -103,7 +103,7 @@ mod tests {
         let category_type = controls::category_type();
         let expected = format!("{}:{}", category, category_type);
 
-        let name = stream_name!(&category, category_type = &category_type);
+        let name = stream_name!(category, category_type = category_type);
 
         assert_eq!(name, expected);
     }
@@ -114,7 +114,7 @@ mod tests {
         let types = controls::category_types();
         let expected = format!("{}:{}", category, types.join("+"));
 
-        let name = stream_name!(&category, category_types = &types);
+        let name = stream_name!(category, category_types = types);
 
         assert_eq!(expected, name);
     }
@@ -124,9 +124,9 @@ mod tests {
         let category = controls::category();
         let id = controls::id();
 
-        let expected = format!("{}-{}", &category, &id);
+        let expected = format!("{}-{}", category, id);
 
-        let result = stream_name!(&category, id = &id);
+        let result = stream_name!(category, id = id);
 
         assert_eq!(expected, result);
     }
@@ -136,9 +136,9 @@ mod tests {
         let category = controls::category();
         let ids = controls::ids();
 
-        let expected = format!("{}-{}", &category, ids.join("+"));
+        let expected = format!("{}-{}", category, ids.join("+"));
 
-        let result = stream_name!(&category, ids = &ids);
+        let result = stream_name!(category, ids = ids);
 
         assert_eq!(expected, result);
     }

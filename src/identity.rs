@@ -1,9 +1,9 @@
+use crate::Uuid;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use uuid::Uuid;
 
-pub fn uuid() -> String {
-    Uuid::new_v4().to_string()
+pub fn uuid() -> Uuid {
+    Uuid::new_v4()
 }
 
 pub fn random(len: usize) -> String {
@@ -15,11 +15,6 @@ pub fn random(len: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn generates_uuids() {
-        assert_eq!(36, uuid().len());
-    }
 
     #[test]
     fn generates_random() {

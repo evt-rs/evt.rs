@@ -1,10 +1,11 @@
-mod controls;
+pub mod controls;
 #[macro_use]
 mod macros;
 mod segment;
 mod segment_list;
 mod utils;
 
+pub use macros::*;
 pub use utils::*;
 
 const ID_SEPARATOR: &str = "-";

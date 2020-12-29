@@ -35,26 +35,26 @@ pub fn compound_category_type_example() -> String {
     format!("{}-{}", category_with_types_example(), id())
 }
 
-pub fn category() -> String {
-    "category".to_string()
+pub fn category<'a>() -> &'a str {
+    "category"
 }
 
-pub fn id() -> String {
-    "id".to_string()
+pub fn id<'a>() -> &'a str {
+    "id"
 }
 
-pub fn cardinal_id() -> String {
-    "cardinal".to_string()
+pub fn cardinal_id<'a>() -> &'a str {
+    "cardinal"
 }
 
-pub fn ids() -> Vec<String> {
-    vec![String::from("idOne"), String::from("idTwo")]
+pub fn ids<'a>() -> Vec<&'a str> {
+    vec!["idOne", "idTwo"]
 }
 
-pub fn category_type() -> String {
-    "type".to_string()
+pub fn category_type<'a>() -> &'a str {
+    "type"
 }
 
-pub fn category_types() -> Vec<String> {
-    vec![String::from("typeOne"), String::from("typeTwo")]
+pub fn category_types<'a>() -> Vec<&'a str> {
+    vec!["typeOne", "typeTwo"]
 }
