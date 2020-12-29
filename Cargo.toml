@@ -7,9 +7,10 @@ authors = ["Matt Briggs <matt@mattbriggs.net>"]
 edition = "2018"
 
 [dependencies]
+chrono = "0.4.19"
 log = "0.4.11"
 openssl = "0.10.31"
-postgres = "0.18.1"
+postgres = { version = "0.18.1", features = ["with-chrono-0_4"] }
 postgres-openssl = "0.4.0"
 serde = "1.0.118"
 serde_json = "1.0.60"
