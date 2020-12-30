@@ -1,8 +1,9 @@
-use crate::identity;
-use crate::message_store::errors::MessageStoreError;
-use crate::message_store::{MessageData, MessageStore};
 use postgres::types::ToSql;
 use postgres::GenericClient;
+
+use crate::identity;
+use crate::message_store::core::{MessageData, MessageStore};
+use crate::message_store::errors::MessageStoreError;
 
 pub type Params<'a> = &'a [&'a (dyn ToSql + Sync)];
 
@@ -102,28 +103,30 @@ pub fn put<T: GenericClient>(
     }
 
     message.position = row?.get(0);
+    message.stream_name = Some(String::from(stream_name));
 
     Ok(message)
 }
 
 #[cfg(test)]
 mod tests {
-    use super::Put;
+    use crate::message_store::core::MessageData;
     use crate::message_store::errors::MessageStoreError;
-    use crate::message_store::{controls, MessageData};
+    use crate::message_store::{controls, INITIAL};
     use crate::stream_name;
     use crate::Json;
     use crate::Uuid;
 
+    use super::Put;
+
     #[test]
     fn puts_message_data_into_stream_storage() {
         let mut store = controls::message_store();
-        let client = &mut store.client;
 
         let mut data = controls::new_example();
         let stream_name = stream_name::controls::unique_example();
 
-        let result = store.put(&mut data, &stream_name, Some(-1)).unwrap();
+        let result = store.put(&mut data, &stream_name, INITIAL).unwrap();
 
         assert_eq!(0, result.position.unwrap());
         assert!(result.id.is_some());

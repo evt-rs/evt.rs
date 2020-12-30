@@ -1,5 +1,5 @@
-use crate::message_store::{MessageData, Settings};
-use crate::{clock, db, identity, messaging, stream_name, MessageStore, Uuid};
+use crate::message_store::core::{MessageData, MessageStore, Settings};
+use crate::{clock, db, identity, messaging, stream_name, Uuid};
 
 pub fn settings() -> Settings {
     Settings {

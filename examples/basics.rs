@@ -163,8 +163,8 @@ impl Account {
 //     consumer.start(stream_name!("account", type = "command"));
 // }
 //
-// fn main() {
-//     component_host.start("account-service", |h| {
-//       h.register(start)
-//     })
-// }
+fn main() {
+    // component_host.start("account-service", |h| {
+    //   h.register(start)
+    // })
+}
