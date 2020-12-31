@@ -12,16 +12,16 @@ type DataResult = Result<Vec<MessageData>, MessageStoreError>;
 type SingleResult = Result<Option<MessageData>, MessageStoreError>;
 
 pub trait Get {
-    fn get(self, stream_name: &str, position: Option<i64>) -> DataResult;
-    fn get_last(self, stream_name: &str) -> SingleResult;
+    fn get(&mut self, stream_name: &str, position: Option<i64>) -> DataResult;
+    fn get_last(&mut self, stream_name: &str) -> SingleResult;
 }
 
 impl Get for MessageStore {
-    fn get(mut self, stream_name: &str, position: Option<i64>) -> DataResult {
+    fn get(&mut self, stream_name: &str, position: Option<i64>) -> DataResult {
         get(&mut self.client, &mut self.settings, stream_name, position)
     }
 
-    fn get_last(mut self, stream_name: &str) -> SingleResult {
+    fn get_last(&mut self, stream_name: &str) -> SingleResult {
         get_last(&mut self.client, stream_name)
     }
 }
