@@ -1,5 +1,4 @@
 use crate::message_store::{MessageData, MessageStoreError};
-use serde::export::fmt::Arguments;
 use std::io::Write;
 
 pub fn bulk_insert(

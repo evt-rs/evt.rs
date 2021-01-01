@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 pub trait Segment {
     fn process(self) -> Option<String>;
 }
@@ -5,6 +7,18 @@ pub trait Segment {
 impl Segment for String {
     fn process(self) -> Option<String> {
         Some(self)
+    }
+}
+
+impl Segment for Uuid {
+    fn process(self) -> Option<String> {
+        Some(self.to_string())
+    }
+}
+
+impl Segment for &Uuid {
+    fn process(self) -> Option<String> {
+        Some(self.to_string())
     }
 }
 

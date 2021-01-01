@@ -1,3 +1,5 @@
+use uuid::Uuid;
+
 pub(crate) trait SegmentList {
     fn process(self) -> Option<Vec<String>>;
 }
@@ -51,6 +53,17 @@ impl SegmentList for &String {
 }
 
 impl SegmentList for &str {
+    fn process(self) -> Option<Vec<String>> {
+        None
+    }
+}
+impl SegmentList for &Uuid {
+    fn process(self) -> Option<Vec<String>> {
+        None
+    }
+}
+
+impl SegmentList for Uuid {
     fn process(self) -> Option<Vec<String>> {
         None
     }

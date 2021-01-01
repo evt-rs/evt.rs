@@ -1,9 +1,9 @@
 pub mod controls;
 #[macro_use]
-mod macros;
-mod segment;
-mod segment_list;
-mod utils;
+pub mod macros;
+pub mod segment;
+pub mod segment_list;
+pub mod utils;
 
 pub use macros::*;
 pub use utils::*;

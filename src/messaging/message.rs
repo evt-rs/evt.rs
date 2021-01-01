@@ -1,34 +1,58 @@
 use crate::message_store::MessageData;
+use crate::messaging::Metadata;
 use crate::Uuid;
 use core::{fmt, ops};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::convert::TryFrom;
 
-pub struct Message<T: Serialize + DeserializeOwned + Default>(pub T, Option<Uuid>);
-
-pub fn follow<T, M>(message: &Message<M>) -> Result<Message<T>, serde_json::Error>
-where
-    T: Serialize + DeserializeOwned + Default,
-    M: Serialize + DeserializeOwned + Default,
-{
-    let from: &M = message;
-    let from_value = serde_json::to_value(from)?;
-    let data: T = serde_json::from_value(from_value)?;
-
-    Ok(Message(data, None))
-}
+pub struct Message<T: Serialize + DeserializeOwned + Default>(
+    pub T,
+    pub Option<Uuid>,
+    pub Metadata,
+);
 
 impl<T> Message<T>
 where
     T: Serialize + DeserializeOwned + Default,
 {
+    pub fn follow<M>(message: &Message<M>) -> Result<Self, serde_json::Error>
+    where
+        M: Serialize + DeserializeOwned + Default,
+    {
+        let metadata = Metadata::follow(message.metadata());
+        let from: &M = message;
+        let from_value = serde_json::to_value(from)?;
+        let data: T = serde_json::from_value(from_value)?;
+
+        Ok(Message(data, None, metadata))
+    }
+
+    pub fn follows<M>(&self, other: &Message<M>) -> bool
+    where
+        M: Serialize + DeserializeOwned + Default,
+    {
+        self.metadata().follows(other.metadata())
+    }
+
+    pub fn correlated(&self, stream: &str) -> bool {
+        self.metadata().correlated(stream)
+    }
+
+    pub fn correlate(&mut self, stream: &str) {
+        self.2.correlate(stream);
+    }
+
     pub fn message_id(&self) -> &Option<Uuid> {
         &self.1
     }
 
     pub fn into_inner(self) -> T {
         self.0
+    }
+
+    pub fn metadata(&self) -> &Metadata {
+        &self.2
     }
 }
 
@@ -40,9 +64,10 @@ where
 
     fn try_from(value: MessageData) -> Result<Self, Self::Error> {
         let id = value.id;
+        let metadata = Metadata::from(&value);
         let val: T = serde_json::from_value(value.data)?;
 
-        Ok(Message(val, id))
+        Ok(Message(val, id, metadata))
     }
 }
 
@@ -86,91 +111,39 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::Message;
-    use serde::{Deserialize, Serialize};
+    use crate::messaging::controls::message as controls;
+    use crate::messaging::Message;
+    use crate::stream_name;
 
-    #[derive(Default, Serialize, Deserialize)]
-    struct MyCommand {
-        my_val: bool,
-        my_different_val: bool,
-    }
+    #[test]
+    fn following_copies_attributes() {
+        let cmd = controls::command();
+        let field1 = controls::field1();
+        let field2 = controls::field2();
 
-    impl MyCommand {
-        fn val(&self) -> bool {
-            self.my_val
-        }
-    }
+        let evt: Message<controls::Event> = Message::follow(&cmd).unwrap();
 
-    #[derive(Default, Serialize, Deserialize)]
-    #[serde(default)]
-    struct MyEvent {
-        my_val: bool,
-        my_other_val: bool,
+        assert_eq!(field1, evt.field1);
+        assert_eq!(field2, evt.field2);
+        assert_eq!(String::default(), evt.field3);
     }
 
     #[test]
-    fn fields_can_be_dereferenced() {
-        let val = MyCommand {
-            my_val: true,
-            ..Default::default()
-        };
-        let msg = Message(val, None);
+    fn follows() {
+        let cmd = controls::command();
 
-        assert!(msg.my_val);
+        let evt: Message<controls::Event> = Message::follow(&cmd).unwrap();
+
+        assert!(evt.follows(&cmd));
     }
 
     #[test]
-    fn methods_can_be_dereferenced() {
-        let val = MyCommand {
-            my_val: true,
-            ..Default::default()
-        };
-        let msg = Message(val, None);
+    fn correlates() {
+        let mut cmd = controls::command();
+        let stream = stream_name::controls::example();
 
-        assert!(msg.val());
-    }
+        cmd.correlate(&stream);
 
-    #[test]
-    fn can_coerce() {
-        let val = MyCommand {
-            my_val: true,
-            ..Default::default()
-        };
-        let msg = Message(val, None);
-        let result: &MyCommand = &msg;
-
-        assert!(result.my_val);
-    }
-
-    #[test]
-    fn converts_to_inner_value() {
-        let val = MyCommand {
-            my_val: true,
-            ..Default::default()
-        };
-        let msg = Message(val, None);
-        let result = msg.into_inner();
-
-        assert!(result.my_val);
-    }
-
-    mod following {
-        use super::super::{follow, Message};
-        use super::*;
-
-        #[test]
-        fn copies_attributes() {
-            let cmd_data = MyCommand {
-                my_val: true,
-                ..Default::default()
-            };
-
-            let cmd = Message(cmd_data, None);
-
-            let evt: Message<MyEvent> = follow(&cmd).unwrap();
-
-            assert_eq!(true, evt.my_val);
-            assert_eq!(false, evt.my_other_val);
-        }
+        assert!(cmd.correlated(&stream));
     }
 }

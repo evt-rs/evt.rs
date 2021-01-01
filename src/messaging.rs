@@ -1,4 +1,6 @@
 pub mod controls;
 mod message;
+mod metadata;
 
-pub use message::{follow, Message};
+pub use message::Message;
+pub use metadata::Metadata;

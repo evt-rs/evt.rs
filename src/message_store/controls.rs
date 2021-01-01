@@ -20,8 +20,8 @@ pub fn example() -> MessageData {
         message_type: message_type(),
         position: position(),
         global_position: global_position(),
-        data: messaging::controls::data(),
-        metadata: messaging::controls::metadata(),
+        data: messaging::controls::message::data(),
+        metadata: messaging::controls::message::metadata(),
         stream_name: Some(stream_name::controls::example()),
         time: Some(clock::controls::time()),
     }
@@ -30,8 +30,8 @@ pub fn example() -> MessageData {
 pub fn new_example() -> MessageData {
     MessageData {
         message_type: message_type(),
-        data: messaging::controls::data(),
-        metadata: messaging::controls::metadata(),
+        data: messaging::controls::message::data(),
+        metadata: messaging::controls::message::metadata(),
         ..Default::default()
     }
 }

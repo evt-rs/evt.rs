@@ -180,7 +180,7 @@ mod tests {
         let mut store = controls::message_store();
         let stream_name = stream_name::controls::unique_example();
 
-        let mut results = store.get(stream_name.as_str(), None).unwrap();
+        let results = store.get(stream_name.as_str(), None).unwrap();
 
         assert_eq!(0, results.len());
     }
