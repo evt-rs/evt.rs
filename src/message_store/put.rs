@@ -3,42 +3,37 @@ use postgres::GenericClient;
 
 use crate::identity;
 use crate::message_store::core::{MessageData, MessageStore};
-use crate::message_store::errors::MessageStoreError;
+use crate::Error;
 
 pub type Params<'a> = &'a [&'a (dyn ToSql + Sync)];
 
-pub trait Put {
+pub trait Put<T, R> {
     fn put(
         &mut self,
-        data: &MessageData,
+        data: T,
         stream_name: &str,
         expected_version: Option<i64>,
-    ) -> Result<MessageData, MessageStoreError>;
-
-    fn put_many(
-        &mut self,
-        data: Vec<&MessageData>,
-        stream_name: &str,
-        expected_version: Option<i64>,
-    ) -> Result<Vec<MessageData>, MessageStoreError>;
+    ) -> Result<R, Error>;
 }
 
-impl Put for MessageStore {
+impl Put<&MessageData, MessageData> for MessageStore {
     fn put(
         &mut self,
         data: &MessageData,
         stream_name: &str,
         expected_version: Option<i64>,
-    ) -> Result<MessageData, MessageStoreError> {
+    ) -> Result<MessageData, Error> {
         put(&mut self.client, data, stream_name, expected_version)
     }
+}
 
-    fn put_many(
+impl Put<Vec<&MessageData>, Vec<MessageData>> for MessageStore {
+    fn put(
         &mut self,
         data: Vec<&MessageData>,
         stream_name: &str,
         expected_version: Option<i64>,
-    ) -> Result<Vec<MessageData>, MessageStoreError> {
+    ) -> Result<Vec<MessageData>, Error> {
         put_many(&mut self.client, data, stream_name, expected_version)
     }
 }
@@ -48,7 +43,7 @@ pub fn put_many<T: GenericClient>(
     message_data: Vec<&MessageData>,
     stream_name: &str,
     expected_version: Option<i64>,
-) -> Result<Vec<MessageData>, MessageStoreError> {
+) -> Result<Vec<MessageData>, Error> {
     let mut tx = client.transaction()?;
     let mut next = expected_version;
     let mut results: Vec<MessageData> = vec![];
@@ -72,7 +67,7 @@ pub fn put<T: GenericClient>(
     data: &MessageData,
     stream_name: &str,
     expected_version: Option<i64>,
-) -> Result<MessageData, MessageStoreError> {
+) -> Result<MessageData, Error> {
     let mut message = data.clone();
 
     if message.id.is_none() {
@@ -98,7 +93,7 @@ pub fn put<T: GenericClient>(
     if let Err(ref e) = row {
         let msg = e.to_string();
         if msg.starts_with("ERROR: Wrong expected version") {
-            return Err(MessageStoreError::ExpectedVersion(msg));
+            return Err(Error::ExpectedVersion(msg));
         }
     }
 
@@ -111,9 +106,9 @@ pub fn put<T: GenericClient>(
 #[cfg(test)]
 mod tests {
     use crate::message_store::core::MessageData;
-    use crate::message_store::errors::MessageStoreError;
     use crate::message_store::{controls, INITIAL};
     use crate::stream_name;
+    use crate::Error;
     use crate::Json;
     use crate::Uuid;
 
@@ -123,10 +118,10 @@ mod tests {
     fn puts_message_data_into_stream_storage() {
         let mut store = controls::message_store();
 
-        let mut data = controls::new_example();
+        let data = controls::new_example();
         let stream_name = stream_name::controls::unique_example();
 
-        let result = store.put(&mut data, &stream_name, INITIAL).unwrap();
+        let result = store.put(&data, &stream_name, INITIAL).unwrap();
 
         assert_eq!(0, result.position.unwrap());
         assert!(result.id.is_some());
@@ -183,7 +178,7 @@ mod tests {
 
         assert!(result.is_err());
 
-        if let Err(MessageStoreError::ExpectedVersion(e)) = result {
+        if let Err(Error::ExpectedVersion(e)) = result {
             assert_eq!(expected, e);
         }
     }
@@ -195,8 +190,8 @@ mod tests {
 
         let data: Vec<MessageData> = (0..10).map(|_| controls::new_example()).collect();
 
-        let results = store
-            .put_many(data.iter().collect(), stream_name.as_str(), None)
+        let results: Vec<MessageData> = store
+            .put(data.iter().collect(), stream_name.as_str(), None)
             .unwrap();
 
         assert_eq!(10, results.len());

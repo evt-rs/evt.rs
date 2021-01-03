@@ -1,15 +1,15 @@
 use postgres::types::ToSql;
 use postgres::Client;
 
-use crate::message_store::MessageStoreError;
 use crate::message_store::{MessageData, MessageStore, Settings};
 use crate::stream_name::is_category;
+use crate::Error;
 use crate::{DateTime, Json, Utc, Uuid};
 use chrono::NaiveDateTime;
 
 type Params<'a> = &'a [&'a (dyn ToSql + Sync)];
-type DataResult = Result<Vec<MessageData>, MessageStoreError>;
-type SingleResult = Result<Option<MessageData>, MessageStoreError>;
+type DataResult = Result<Vec<MessageData>, Error>;
+type SingleResult = Result<Option<MessageData>, Error>;
 
 pub trait Get {
     fn get(&mut self, stream_name: &str, position: Option<i64>) -> DataResult;
@@ -48,7 +48,7 @@ pub fn get_last(client: &mut Client, stream_name: &str) -> SingleResult {
         0 => Ok(None),
         _ => {
             let stream_name = String::from(stream_name);
-            let e = MessageStoreError::MultipleMessages(stream_name);
+            let e = Error::MultipleMessages(stream_name);
 
             Err(e)
         }
@@ -191,8 +191,8 @@ mod tests {
         let data: Vec<MessageData> = (0..2).map(|_| controls::new_example()).collect();
         let stream_name = stream_name::controls::unique_example();
 
-        let stored = store
-            .put_many(data.iter().collect(), stream_name.as_str(), INITIAL)
+        let stored: Vec<MessageData> = store
+            .put(data.iter().collect(), stream_name.as_str(), INITIAL)
             .unwrap();
 
         let retrieved = store.get_last(stream_name.as_str()).unwrap().unwrap();

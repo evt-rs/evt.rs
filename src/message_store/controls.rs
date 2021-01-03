@@ -37,7 +37,7 @@ pub fn new_example() -> MessageData {
 }
 
 pub fn message_type() -> String {
-    String::from("MyMessage")
+    String::from("Event")
 }
 
 pub fn position() -> Option<i64> {

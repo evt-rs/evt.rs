@@ -9,6 +9,8 @@ pub struct Metadata {
     #[serde(skip)]
     pub stream_name: Option<String>,
     #[serde(skip)]
+    pub message_type: Option<String>,
+    #[serde(skip)]
     pub position: Option<i64>,
     #[serde(skip)]
     pub global_position: Option<i64>,
@@ -30,15 +32,13 @@ pub struct Metadata {
 
 impl Metadata {
     pub fn follow(other: &Metadata) -> Metadata {
-        let mut next = Metadata {
+        Metadata {
             causation_message_stream_name: other.causation_message_stream_name.clone(),
             causation_message_position: other.causation_message_position,
             causation_message_global_position: other.causation_message_global_position,
             reply_stream_name: other.reply_stream_name.clone(),
             ..Default::default()
-        };
-
-        next
+        }
     }
 
     pub fn follows(&self, other: &Metadata) -> bool {

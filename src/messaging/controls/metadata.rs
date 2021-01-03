@@ -1,11 +1,12 @@
 use crate::messaging::Metadata;
-use crate::{clock, DateTime, Utc};
+use crate::{clock, message_store, DateTime, Utc};
 
 pub fn example() -> Metadata {
     Metadata {
         stream_name: Some(stream()),
         position: Some(position()),
         global_position: Some(global_position()),
+        message_type: Some(message_type()),
         causation_message_stream_name: Some(causation_message_stream_name()),
         causation_message_position: Some(causation_message_position()),
         causation_message_global_position: Some(causation_message_global_position()),
@@ -24,6 +25,10 @@ pub fn empty() -> Metadata {
 
 pub fn stream() -> String {
     String::from("stream")
+}
+
+pub fn message_type() -> String {
+    message_store::controls::message_type()
 }
 
 pub fn position() -> i64 {
